@@ -68,6 +68,8 @@ public class PlayerController : MonoBehaviour {
     
     private Animator anim;
 
+    private bool _wallColliding;
+
 	// Use this for initialization
 	void Start () {
 
@@ -164,10 +166,22 @@ public class PlayerController : MonoBehaviour {
             else if(Input.GetKey(left))
             {
                 theRB.velocity = new Vector2(-moveSpeed, theRB.velocity.y);
+
+                if( _wallColliding ) {
+                    _doubleJumpState = 1;
+                    _alreadyJumped = false;
+
+                    theRB.velocity = new Vector2(-moveSpeed, -0.4f);
+                }
             }        
             else if (Input.GetKey(right))
             {
                 theRB.velocity = new Vector2(moveSpeed, theRB.velocity.y);
+                
+                if( _wallColliding ) {
+                    _doubleJumpState = 1;
+                    _alreadyJumped = false;
+                }
             }
             else {
                 theRB.velocity = new Vector2(0, theRB.velocity.y);
@@ -234,8 +248,8 @@ public class PlayerController : MonoBehaviour {
                 {
                     theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
                     _doubleJumpState = 1;
-
                 }
+
                 else if (_doubleJumpState == 1 && !_alreadyJumped)
                 {
                     theRB.velocity = new Vector2(theRB.velocity.x, jumpForce * 2/3);
@@ -330,7 +344,7 @@ public class PlayerController : MonoBehaviour {
         {
             _onItemObj = other.gameObject;
 
-            Debug.Log("Entrou no item;");
+            //Debug.Log("Entrou no item;");
             
         }
 
@@ -342,8 +356,24 @@ public class PlayerController : MonoBehaviour {
         {
             if (other.gameObject.GetInstanceID() == _onItemObj.GetInstanceID()){
                 _onItemObj = null;
-                Debug.Log("Saiu do item;");
+                //Debug.Log("Saiu do item;");
             }
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D coll)
+    {        
+        if (coll.gameObject.layer == 12 && !Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, whatIsGround))
+        {
+            _wallColliding = true;
+        }
+    }
+
+    void OnCollisionExit2D(Collision2D coll)
+    {      
+        if (coll.gameObject.layer == 12 && !Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, whatIsGround))
+        {
+            _wallColliding = false;
         }
     }
     
